@@ -20,6 +20,7 @@ const showFilledOrders = (filledOrders) => {
         </tbody>
     )
 };
+
 class Trades extends Component {
     render() {
         return (

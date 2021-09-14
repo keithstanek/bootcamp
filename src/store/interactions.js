@@ -65,8 +65,8 @@ export const loadAllOrders = async (exchange, dispatch) => {
     const filledOrders = tradeStream.map((event) => event.returnValues);
     dispatch(filledOrdersLoaded(filledOrders));
 
-    // get trades (filled orders)
+    // get orders
     const orderStream = await exchange.getPastEvents('Order', {fromBlock: 0, toBlock: 'latest'});
-    const allOrders = tradeStream.map((event) => event.returnValues);
+    const allOrders = orderStream.map((event) => event.returnValues);
     dispatch(allOrdersLoaded(allOrders));
 }
