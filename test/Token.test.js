@@ -1,7 +1,7 @@
 const Token = artifacts.require('./Token')
 
 require('chai').use(require('chai-as-promised')).should();
-import {EVM_REVERT, tokens} from "../src/helpers";
+import {EVM_REVERT, tokens} from "../helpers";
 
 contract('Token', async ([deployer, receiver, exchange]) => {
 
