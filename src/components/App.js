@@ -37,7 +37,6 @@ class App extends Component {
   }
 
   render() {
-    console.log("------------> account from state", this.props.account);
     return (
         <div>
           <Navbar />
@@ -48,7 +47,6 @@ class App extends Component {
 }
 
 function mapStateToProps(state) {
-  console.log("contracts loaded: " + contractsLoadedSelector(state));
   return {
     contractsLoaded: contractsLoadedSelector(state)
   }

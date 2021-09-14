@@ -5,7 +5,7 @@ import {orderBookLoadedSelector, orderBookSelector} from "../store/selectors";
 
 const renderOrder = (order) => {
     return (
-        <tr className={`order-${order.id}`} id={order.id}>
+        <tr className={`order-${order.id}`} key={order.id}>
             <td>{order.tokenAmount}</td>
             <td className={`text-${order.orderTypeClass}`}>{order.tokenPrice}</td>
             <td>{order.etherAmount}</td>
@@ -17,16 +17,15 @@ const showOrderBook = (props) => {
     const { orderBook } = props;
     return (
         <tbody>
-            {orderBook.sellOrders.map( (order) => renderOrder(order, props) )}
+            {orderBook.sellOrders.map( (order) => renderOrder(order) )}
 
-            {orderBook.buyOrders.map( (order) => renderOrder(order, props) )}
+            {orderBook.buyOrders.map( (order) => renderOrder(order) )}
         </tbody>
     )
 };
 
 class OrderBook extends Component {
     render() {
-        console.log('===========>', this.props.showOrderBook, this.props.orderBook);
         return (
             <div className="vertical">
                 <div className="card bg-dark text-white">

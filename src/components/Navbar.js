@@ -6,7 +6,6 @@ import { accountSelector } from "../store/selectors";
 
 class Navbar extends Component {
     render() {
-        console.log("------------> Navbar account from state", this.props.account);
         return (
             <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
                 <div className="container-fluid">

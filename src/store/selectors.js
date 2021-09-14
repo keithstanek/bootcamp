@@ -40,7 +40,6 @@ export const filledOrderSelector = createSelector(
         // sort by date descending
         orders = decorateFilledOrders(orders);
         orders = orders.sort( (a,b) => b.timestamp - a.timestamp);
-        // console.log(orders);
         return orders;
     }
 );
@@ -108,8 +107,6 @@ const openOrders = state => {
         const orderCancelled = cancelled.some( (o) => o.id === order.id);
         return (orderFilled || orderCancelled);
     })
-
-    console.log("openOrders orders length: " + openOrders.length);
 
     return openOrders;
 }
