@@ -14,7 +14,7 @@ export const loadWeb3 = async (dispatch) => {
         dispatch(web3Loaded(web3))
         return web3
     } else {
-        window.alert('Please install MetaMask')
+        console.log('Please install MetaMask')
         window.location.assign("https://metamask.io/")
     }
 }
@@ -22,15 +22,12 @@ export const loadWeb3 = async (dispatch) => {
 export const loadAccount = async (web3, dispatch) => {
 
     const accounts = await web3.eth.getAccounts()
-    console.log("-----------------------------------------------");
-    console.log("accounts length", accounts.length);
-    console.log("-----------------------------------------------");
     const account = await accounts[0]
     if(typeof account !== 'undefined'){
         dispatch(web3AccountLoaded(account))
         return account
     } else {
-        window.alert('Please login with MetaMask')
+        console.log('Please login with MetaMask')
         return null
     }
 }
@@ -38,9 +35,6 @@ export const loadAccount = async (web3, dispatch) => {
 export const loadToken = async (web3, networkId, dispatch) => {
     try {
         const token = new web3.eth.Contract(Token.abi, Token.networks[networkId].address)
-        console.log("-----------------------------------------------");
-        console.log("Token Contract Address", Token.networks[networkId].address);
-        console.log("-----------------------------------------------");
         dispatch(tokenLoaded(token))
         return token
     } catch (error) {
@@ -52,9 +46,6 @@ export const loadToken = async (web3, networkId, dispatch) => {
 export const loadExchange = async (web3, networkId, dispatch) => {
     try {
         const exchange = new web3.eth.Contract(Exchange.abi, Exchange.networks[networkId].address)
-        console.log("-----------------------------------------------");
-        console.log("Exchange Contract Address", Exchange.networks[networkId].address);
-        console.log("-----------------------------------------------");
         dispatch(exchangeLoaded(exchange))
         return exchange
     } catch (error) {
