@@ -1,25 +1,26 @@
 import React, { Component } from 'react';
 import './App.css';
-import Web3 from 'web3';
-import Token from '../abis/Token.json';
+import Web3 from 'web3'
+import { connect } from 'react-redux'
+import {
+  loadWeb3,
+  loadAccount,
+  loadToken,
+  loadExchange
+} from '../store/interactions'
 
 class App extends Component {
-
-  // let accounts;
-
-  componentWillMount() {
-    this.loadBlockchainData()
+  componentDidMount() {
+    this.loadBlockchainData(this.props.dispatch)
   }
 
-  async loadBlockchainData() {
-    const web3 = new Web3(window.ethereum);
-    let networkId = await web3.eth.net.getId();
-    networkId = 5777;  // this version needs the port number instead of the array index
-    const accounts = await web3.eth.getAccounts();
-    console.log("------------------------> address: " + Token.networks[networkId].address);
-    const token = new web3.eth.Contract(Token.abi, Token.networks[networkId].address);
-    const totalSupply = await token.methods.totalSupply().call();
-    console.log("totalSupply", totalSupply);
+  async loadBlockchainData(dispatch) {
+    const web3 = await loadWeb3(dispatch)
+    let networkId = await web3.eth.net.getId()
+    await window.ethereum.enable(); // if on a different network... I had to add this to log in to the local account
+    const accounts = await loadAccount(web3, dispatch)
+    const token = await loadToken(web3, networkId, dispatch)
+    const exchange = await loadExchange(web3, networkId, dispatch)
   }
 
   render() {
@@ -113,4 +114,10 @@ class App extends Component {
   }
 }
 
-export default App;
+function mapStateToProps(state) {
+  return {
+    // TODO: Fill me in...
+  }
+}
+
+export default connect(mapStateToProps)(App);
