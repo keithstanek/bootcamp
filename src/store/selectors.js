@@ -7,7 +7,7 @@ const account = state => get(state, 'web3.account');
 export const accountSelector = createSelector(account, a => a);
 
 const tokenLoaded = state => get(state, 'token.loaded', false);
-export const tokenSelector = createSelector(tokenLoaded, tl => tl);
+export const tokenLoadedSelector = createSelector(tokenLoaded, tl => tl);
 
 const exchangeLoaded = state => get(state, 'exchange.loaded', false);
 export const exchangeLoadedSelector = createSelector(exchangeLoaded, el => el);
@@ -33,7 +33,7 @@ const filledOrdersLoaded = state => get(state, 'exchange.filledOrders.loaded', f
 export const filledOrdersLoadedSelector = createSelector(filledOrdersLoaded, el => el);
 
 const filledOrders = state => get(state, 'exchange.filledOrders.data', []);
-export const filledOrderSelector = createSelector(
+export const filledOrdersSelector = createSelector(
     filledOrders, (orders) => {
         // sort ascending for price comparison
         orders = orders.sort( (a,b) => a.timestamp - b.timestamp);
@@ -157,5 +157,82 @@ const decorateOrderBookOrder = (order) => {
         orderTypeClass: (orderType === 'buy' ? GREEN : RED),
         orderFillClass: (orderType === 'buy' ? 'sell': 'buy')
 
+    });
+}
+
+export const myFilledOrdersLoadedSelector = createSelector(filledOrdersLoaded, loaded => loaded);
+export const myFilledOrdersSelector = createSelector(
+    account,
+    filledOrders,
+    (account, orders) => {
+        // find my orders
+        orders = orders.filter( (o) => o.user === account || o.userFill === account);
+        orders = orders.sort( (a,b) => a.timestamp - b.timestamp);
+        orders = decorateMyFilledOrders(orders, account);
+
+        return orders;
+    }
+);
+
+const decorateMyFilledOrders = (orders, account) => {
+    return (
+        orders.map( (order) => {
+            order = decorateOrder(order);
+            order = decorateMyFilledOrder(order, account);
+            return order;
+        })
+    );
+};
+
+const decorateMyFilledOrder = (order, account) => {
+
+    const myOrder = order.user === account;
+
+    let orderType;
+    if (myOrder) {
+        orderType = order.tokenGive === ETHER_ADDRESS ? 'buy' : 'sell';
+    } else {
+        orderType = order.tokenGive === ETHER_ADDRESS ? 'sell' : 'buy';
+    }
+
+    return ({
+        ...order,
+        orderType,
+        orderTypeClass: (orderType === 'buy' ? GREEN : RED),
+        orderSign: (orderType === 'buy' ? '+' : '-')
+    });
+}
+
+export const myOpenOrdersLoadedSelector = createSelector( orderBookLoaded, loaded => loaded);
+export const myOpenOrderSelector = createSelector(
+    account,
+    openOrders,
+    (account, orders) => {
+        // filter order create by current account
+        orders = orders.filter( (o) => o.user === account);
+        orders = decorateMyOpenOrders(orders);
+        orders = orders.sort( (a,b) => b.timestamp - a.timestamp);
+
+        return orders;
+    }
+)
+
+const decorateMyOpenOrders = (orders, account) => {
+    return (
+        orders.map( (order) => {
+            order = decorateOrder(order);
+            order = decorateMyOpenOrder(order, account);
+            return order;
+        })
+    );
+};
+
+const decorateMyOpenOrder = (order, account) => {
+    let orderType = order.tokenGive === ETHER_ADDRESS ? 'buy' : 'sell';
+
+    return ({
+        ...order,
+        orderType,
+        orderTypeClass: (orderType === 'buy' ? GREEN : RED)
     });
 }
