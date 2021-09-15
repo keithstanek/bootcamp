@@ -1,4 +1,4 @@
-import {get, groupBy, reject} from 'lodash';
+import {get, groupBy, maxBy, minBy, reject} from 'lodash';
 import { createSelector } from "reselect";
 import {ETHER_ADDRESS, ether, tokens, GREEN, RED} from "../helpers";
 import moment from "moment";
@@ -236,3 +236,48 @@ const decorateMyOpenOrder = (order, account) => {
         orderTypeClass: (orderType === 'buy' ? GREEN : RED)
     });
 }
+
+export const priceChartLoadedSelector = createSelector(filledOrdersLoaded, loaded => loaded);
+export const priceChartSelector = createSelector(
+    filledOrders,
+    (orders) => {
+        orders = orders.sort( (a,b) => a.timestamp - b.timestamp);
+        orders = orders.map( (o) => decorateOrder(o));
+        let secondLastOrder, lastOrder;
+        [secondLastOrder, lastOrder] = orders.slice(orders.length -2, orders.length);
+
+        const lastPrice = get(lastOrder, 'tokenPrice', 0);
+        console.log("************************ >>> Last price: " + lastPrice);
+        const secondLastPrice = get(secondLastOrder, 'tokenPrice', 0);
+        console.log("************************ >>> 2Last price: " + secondLastPrice);
+
+        return (
+            {
+                lastPrice,
+                lastPriceChange: (lastPrice >= secondLastPrice ? '+' : '-'),
+                series: [{
+                    data: buildGraphData(orders)
+                }]
+            }
+        )
+    }
+)
+
+const buildGraphData = (orders) => {
+    orders = groupBy( orders, (o) => moment.unix(o.timestamp).startOf('hour').format());
+    const hours = Object.keys(orders);
+
+    const graphData = hours.map( (hour) => {
+        const group = orders[hour];
+        const open = group[0];
+        const close = group[group.length -1];
+        const high = maxBy(group, 'tokenPrice');
+        const low = minBy(group, 'tokenPrice')
+        return ({
+            x: new Date(hour),
+            y: [open.tokenPrice, high.tokenPrice, low.tokenPrice, close.tokenPrice]
+        })
+    });
+    console.log("************************ >>> Graph Data: ", graphData);
+    return graphData;
+};
