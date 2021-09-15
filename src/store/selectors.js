@@ -51,7 +51,7 @@ const decorateFilledOrders = (orders) => {
             order = decorateOrder(order);
             order = decorateFilledOrder(order, previousOrder);
             previousOrder = order;
-            return order = order;
+            return order;
         })
     );
 }
@@ -278,6 +278,8 @@ const buildGraphData = (orders) => {
             y: [open.tokenPrice, high.tokenPrice, low.tokenPrice, close.tokenPrice]
         })
     });
-    console.log("************************ >>> Graph Data: ", graphData);
     return graphData;
 };
+
+const orderCancelling = state => get(state, 'exchange.orderCancelling', false);
+export const orderCancellingSelector = createSelector(orderCancelling, status => status);

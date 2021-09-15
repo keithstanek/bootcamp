@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux'
 import Spinner from "./spinner";
 import Chart from 'react-apexcharts';
-import {chartOptions, dummyData} from "./PriceChart.config";
+import {chartOptions} from "./PriceChart.config";
 import {priceChartLoadedSelector, priceChartSelector} from "../store/selectors";
 
 const priceSymbol = (lastPriceChagne) => {
