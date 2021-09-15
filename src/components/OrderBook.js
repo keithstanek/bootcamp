@@ -1,15 +1,32 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux'
 import Spinner from "./spinner";
-import {orderBookLoadedSelector, orderBookSelector} from "../store/selectors";
+import {
+    accountSelector,
+    exchangeSelector,
+    orderBookLoadedSelector,
+    orderBookSelector,
+    orderFillingSelector
+} from "../store/selectors";
+import {OverlayTrigger, Tooltip} from "react-bootstrap";
+import {fillOrder} from "../store/interactions";
 
-const renderOrder = (order) => {
+const renderOrder = (order, props) => {
+    const { dispatch, exchange, account } = props;
     return (
-        <tr className={`order-${order.id}`} key={order.id}>
-            <td>{order.tokenAmount}</td>
-            <td className={`text-${order.orderTypeClass}`}>{order.tokenPrice}</td>
-            <td>{order.etherAmount}</td>
-        </tr>
+        <OverlayTrigger key={order.id} placement="auto" overlay={
+            <Tooltip id={order.id}>
+                {`Click here to ${order.orderFillAction}`}
+            </Tooltip>
+        }>
+            <tr className={`order-book-order`} key={order.id} onClick={ () => {
+                fillOrder(dispatch, exchange, order, account);
+            }}>
+                <td>{order.tokenAmount}</td>
+                <td className={`text-${order.orderTypeClass}`}>{order.tokenPrice}</td>
+                <td>{order.etherAmount}</td>
+            </tr>
+        </OverlayTrigger>
     );
 }
 
@@ -17,9 +34,9 @@ const showOrderBook = (props) => {
     const { orderBook } = props;
     return (
         <tbody>
-            {orderBook.sellOrders.map( (order) => renderOrder(order) )}
+            {orderBook.sellOrders.map( (order) => renderOrder(order, props) )}
 
-            {orderBook.buyOrders.map( (order) => renderOrder(order) )}
+            {orderBook.buyOrders.map( (order) => renderOrder(order, props) )}
         </tbody>
     )
 };
@@ -51,9 +68,13 @@ class OrderBook extends Component {
 }
 
 function mapStateToProps(state) {
+    const orderBookLoaded = orderBookLoadedSelector(state);
+    const orderFilling = orderFillingSelector(state);
     return {
         orderBook: orderBookSelector(state),
-        showOrderBook: orderBookLoadedSelector(state)
+        showOrderBook: orderBookLoaded && !orderFilling,
+        exchange: exchangeSelector(state),
+        account: accountSelector(state)
     }
 }
 

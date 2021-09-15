@@ -155,7 +155,7 @@ const decorateOrderBookOrder = (order) => {
         ...order,
         orderType,
         orderTypeClass: (orderType === 'buy' ? GREEN : RED),
-        orderFillClass: (orderType === 'buy' ? 'sell': 'buy')
+        orderFillAction: (orderType === 'buy' ? 'sell': 'buy')
 
     });
 }
@@ -247,9 +247,7 @@ export const priceChartSelector = createSelector(
         [secondLastOrder, lastOrder] = orders.slice(orders.length -2, orders.length);
 
         const lastPrice = get(lastOrder, 'tokenPrice', 0);
-        console.log("************************ >>> Last price: " + lastPrice);
         const secondLastPrice = get(secondLastOrder, 'tokenPrice', 0);
-        console.log("************************ >>> 2Last price: " + secondLastPrice);
 
         return (
             {
@@ -283,3 +281,6 @@ const buildGraphData = (orders) => {
 
 const orderCancelling = state => get(state, 'exchange.orderCancelling', false);
 export const orderCancellingSelector = createSelector(orderCancelling, status => status);
+
+const orderFilling = state => get(state, 'exchange.orderFilling', false);
+export const orderFillingSelector = createSelector(orderFilling, status => status);

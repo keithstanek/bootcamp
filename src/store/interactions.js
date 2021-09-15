@@ -3,7 +3,13 @@ import {
     web3Loaded,
     web3AccountLoaded,
     tokenLoaded,
-    exchangeLoaded, cancelledOrdersLoaded, filledOrdersLoaded, allOrdersLoaded, orderCancelling, orderCancelled
+    exchangeLoaded,
+    cancelledOrdersLoaded,
+    filledOrdersLoaded,
+    allOrdersLoaded,
+    orderCancelling,
+    orderCancelled,
+    orderFilling, orderFilled
 } from './actions'
 import Token from '../abis/Token.json'
 import Exchange from '../abis/Exchange.json'
@@ -71,6 +77,16 @@ export const loadAllOrders = async (exchange, dispatch) => {
     dispatch(allOrdersLoaded(allOrders));
 }
 
+export const subscribeToEvents = async (exchange, dispatch) => {
+    exchange.events.Cancel({}, (error, event) => {
+        dispatch(orderCancelled(event.returnValues));
+    })
+
+    exchange.events.Trade({}, (error, event) => {
+        dispatch(orderFilled(event.returnValues));
+    })
+}
+
 export const cancelOrder = (dispatch, exchange, order, account) => {
     // cancel the order on the blockchain
     exchange.methods.cancelOrder(order.id).send({ from: account })
@@ -82,8 +98,14 @@ export const cancelOrder = (dispatch, exchange, order, account) => {
     }   );
 }
 
-export const subscribeToEvents = async (exchange, dispatch) => {
-    exchange.events.Cancel({}, (error, event) => {
-        dispatch(orderCancelled(event.returnValues));
-    })
+export const fillOrder = (dispatch, exchange, order, account) => {
+    // cancel the order on the blockchain
+    exchange.methods.fillOrder(order.id).send({ from: account })
+        .on('transactionHash', (hash) => {
+            dispatch(orderFilling())
+        }).on('error', (error) => {
+        console.log("Error filling order", error);
+        window.alert("Error filling the order: " + error);
+    }   );
 }
+
