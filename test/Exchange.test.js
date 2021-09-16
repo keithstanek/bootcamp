@@ -2,7 +2,7 @@ const Exchange = artifacts.require('./Exchange')
 const Token = artifacts.require('./Token')
 
 require('chai').use(require('chai-as-promised')).should();
-import {ETHER_ADDRESS, EVM_REVERT, tokens, ether} from "../helpers";
+import {ETHER_ADDRESS, EVM_REVERT, tokens, ether} from "./helpers";
 
 contract('Exchange', async ([deployer, feeAccount, user1, user2]) => {
 
