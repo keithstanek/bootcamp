@@ -9,10 +9,16 @@ import {
     allOrdersLoaded,
     orderCancelling,
     orderCancelled,
-    orderFilling, orderFilled
+    orderFilling,
+    orderFilled,
+    allBalancesLoaded,
+    exchangeTokenBalanceLoaded,
+    exchangeEtherBalanceLoaded,
+    tokenBalanceLoaded, etherBalanceLoaded, balancesLoading, balancesLoaded
 } from './actions'
 import Token from '../abis/Token.json'
 import Exchange from '../abis/Exchange.json'
+import {ETHER_ADDRESS} from "../helpers";
 
 export const loadWeb3 = async (dispatch) => {
     if(typeof window.ethereum!=='undefined'){
@@ -85,6 +91,15 @@ export const subscribeToEvents = async (exchange, dispatch) => {
     exchange.events.Trade({}, (error, event) => {
         dispatch(orderFilled(event.returnValues));
     })
+
+    exchange.events.Deposit({}, (error, event) => {
+
+        dispatch(balancesLoaded());
+    })
+
+    exchange.events.Withdraw({}, (error, event) => {
+        dispatch(balancesLoaded());
+    })
 }
 
 export const cancelOrder = (dispatch, exchange, order, account) => {
@@ -104,8 +119,83 @@ export const fillOrder = (dispatch, exchange, order, account) => {
         .on('transactionHash', (hash) => {
             dispatch(orderFilling())
         }).on('error', (error) => {
-        console.log("Error filling order", error);
-        window.alert("Error filling the order: " + error);
+            console.log("Error filling order", error);
+            window.alert("Error filling the order: " + error);
     }   );
+}
+
+export const loadAllBalances = async (dispatch, web3, exchange, token, account ) => {
+    // ether wallet balance
+    const etherBalance = await web3.eth.getBalance(account);
+    dispatch(etherBalanceLoaded(etherBalance));
+
+    // token balance from token contract
+    const tokenBalance = await token.methods.balanceOf(account).call();
+    dispatch(tokenBalanceLoaded(tokenBalance));
+
+    // ether balance from exchange contract
+    const exchangeEtherBalance = await exchange.methods.balanceOf(ETHER_ADDRESS, account).call();
+    dispatch(exchangeEtherBalanceLoaded(exchangeEtherBalance));
+
+    // token balance from exchange contract
+    const exchangeTokenBalance = await exchange.methods.balanceOf(token.options.address, account).call();
+    dispatch(exchangeTokenBalanceLoaded(exchangeTokenBalance));
+
+    // trigger that all balances have been loaded
+    dispatch(allBalancesLoaded());
+};
+
+export const depositEther = (dispatch, exchange, web3, amount, account) => {
+    exchange.methods.depositEther().send({
+        from: account,
+        value: web3.utils.toWei(amount, 'ether')
+    }).on('transactionHash', (hash) => {
+        dispatch(balancesLoading())
+    }).on('error', (error) => {
+            console.log("Error depositing ether", error);
+            window.alert("Error depositing ether: " + error);
+        }
+    );
+}
+
+export const withdrawEther = (dispatch, exchange, web3, amount, account) => {
+    exchange.methods.withdrawEther(web3.utils.toWei(amount, 'ether') + '').send({ from: account })
+    .on('transactionHash', (hash) => {
+        dispatch(balancesLoading())
+    }).on('error', (error) => {
+            console.log("Error withdrawing ether", error);
+            window.alert("Error withdrawing ether: " + error);
+        }
+    );
+}
+
+export const depositToken = (dispatch, exchange, token, web3, amount, account) => {
+    amount = web3.utils.toWei(amount, 'ether');
+    token.methods.approve(exchange.options.address, amount).send({from: account })
+    .on('transactionHash', (hash) => {
+        exchange.methods.depositToken(token.options.address, amount).send({from: account})
+        .on('transactionHash', (hash) => {
+            dispatch(balancesLoading())
+        }).on('error', (error) => {
+                console.log("Error depositing ether", error);
+                window.alert("Error depositing ether: " + error);
+            }
+        );
+    }).on('error', (error) => {
+            console.log("Error depositing stnk", error);
+            window.alert("Error depositing stnk: " + error);
+        }
+    );
+}
+
+export const withdrawToken = (dispatch, exchange, token, web3, amount, account) => {
+    exchange.methods.withdrawToken(token.options.address, web3.utils.toWei(amount, 'ether') + '').send({ from: account })
+        .on('transactionHash', (hash) => {
+            dispatch(balancesLoading())
+        }).on('error', (error) => {
+            console.log("Error withdrawing stnk", error);
+            window.alert("Error withdrawing stnk: " + error);
+        }
+    );
 }
 
