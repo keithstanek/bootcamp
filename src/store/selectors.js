@@ -308,13 +308,19 @@ const exchangeTokenBalance = state => get(state, 'exchange.tokenBalance', 0);
 export const exchangeTokenBalanceSelector = createSelector(exchangeTokenBalance, balance => {return formatBalance(balance)});
 
 const etherDepositAmount = state => get(state, 'exchange.etherDepositAmount', 0);
-export const etherDepositAmountSelector = createSelector(etherDepositAmount, e => {return e});
+export const etherDepositAmountSelector = createSelector(etherDepositAmount, amount => {return amount});
 
 const etherWithdrawAmount = state => get(state, 'exchange.etherWithdrawAmount', 0);
-export const etherWithdrawAmountSelector = createSelector(etherWithdrawAmount, e => {return e});
+export const etherWithdrawAmountSelector = createSelector(etherWithdrawAmount, amount => {return amount});
 
 const tokenDepositAmount = state => get(state, 'exchange.tokenDepositAmount', 0);
-export const tokenDepositAmountSelector = createSelector(tokenDepositAmount, e => {return e});
+export const tokenDepositAmountSelector = createSelector(tokenDepositAmount, amount => {return amount});
 
 const tokenWithdrawAmount = state => get(state, 'exchange.tokenWithdrawAmount', 0);
-export const tokenWithdrawAmountSelector = createSelector(tokenWithdrawAmount, e => {return e});
+export const tokenWithdrawAmountSelector = createSelector(tokenWithdrawAmount, amount => {return amount});
+
+const buyOrder = state => get(state, 'exchange.buyOrder', {});
+export const buyOrderSelector = createSelector(buyOrder, order => {return order});
+
+const sellOrder = state => get(state, 'exchange.sellOrder', {});
+export const sellOrderSelector = createSelector(sellOrder, order => {return order});
